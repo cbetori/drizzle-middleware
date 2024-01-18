@@ -1,62 +1,39 @@
-import {
-  MySqlTable,
-  MySqlUpdateBuilder,
-  PreparedQueryHKTBase,
-  QueryResultHKT,
-  TableConfig,
-} from 'drizzle-orm/mysql-core';
-import {
-  drizzle,
-  MySql2QueryResultHKT,
-  MySql2PreparedQueryHKT,
-  MySql2Client,
-} from 'drizzle-orm/mysql2';
+import { MySqlDialect, MySqlSession, MySqlTable } from 'drizzle-orm/mysql-core';
 
-class Wrapper<
-  TTable extends MySqlTable,
-  TQueryResult extends QueryResultHKT,
-  TPreparedQueryHKT extends PreparedQueryHKTBase,
-> {
-  private db: MySqlUpdateBuilder<
-    MySqlTable<TableConfig>,
-    MySql2QueryResultHKT,
-    MySql2PreparedQueryHKT
-  >;
+import { where } from './where.js';
+import { UpdateSet } from 'drizzle-orm';
+
+class Wrapper<TTable extends MySqlTable> {
+  private table: TTable;
+  private session: MySqlSession;
+  private dialect: MySqlDialect;
+
   constructor(
-    update: MySqlUpdateBuilder<
-      MySqlTable<TableConfig>,
-      MySql2QueryResultHKT,
-      MySql2PreparedQueryHKT
-    >,
-    other: any,
+    table: TTable,
+    session: MySqlSession,
+    dialect: MySqlDialect,
+    // other: any,
   ) {
-    this.db = update;
-    console.log(other);
+    this.table = table;
+    this.session = session;
+    this.dialect = dialect;
   }
 
   beforeUpdate(e: MySqlTable) {
-    console.log(e);
+    console.log('update', 'beforeUpdate');
   }
 
-  set(e, ...rest) {
-    console.log(e);
-    console.log('fdasdfsaf');
-    return this.db.set(e);
+  set(e: UpdateSet) {
+    console.log('update', 'set');
+    const res = where(this.table, e, this.session, this.dialect);
+    return res;
   }
 }
 
 export function update(
-  update: MySqlUpdateBuilder<
-    MySqlTable<TableConfig>,
-    MySql2QueryResultHKT,
-    MySql2PreparedQueryHKT
-  >,
-  other: any,
+  table: MySqlTable,
+  session: MySqlSession,
+  dialect: MySqlDialect,
 ) {
-  return new Wrapper(update, other) as unknown as MySqlUpdateBuilder<
-    MySqlTable<TableConfig>,
-    MySql2QueryResultHKT,
-    MySql2PreparedQueryHKT
-  >;
+  return new Wrapper(table, session, dialect);
 }
-//

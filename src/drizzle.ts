@@ -1,47 +1,52 @@
-import { MySqlTable } from 'drizzle-orm/mysql-core';
 import {
-  MySql2Database,
-  drizzle,
-  MySql2DrizzleConfig,
-  MySql2Client,
-} from 'drizzle-orm/mysql2';
-import { update } from './update';
+  MySqlDialect,
+  MySqlSession,
+  MySqlTable,
+  PreparedQueryHKTBase,
+  QueryResultHKT,
+} from 'drizzle-orm/mysql-core';
+import { MySql2Database, MySql2DrizzleConfig } from 'drizzle-orm/mysql2';
+import { update } from './update.js';
+import {
+  TablesRelationalConfig,
+  ExtractTablesWithRelations,
+  RelationalSchemaConfig,
+} from 'drizzle-orm';
 
-class Wrapper<TSchema extends Record<string, unknown> = Record<string, never>> {
-  private db: MySql2Database<TSchema>;
-  private query: MySql2Database<TSchema>['query'];
+class Wrapper<
+  TQueryResult extends QueryResultHKT,
+  TPreparedQueryHKT extends PreparedQueryHKTBase,
+  TFullSchema extends Record<string, unknown> = {},
+  TSchema extends TablesRelationalConfig = ExtractTablesWithRelations<TFullSchema>,
+> {
+  private client: MySql2Database<TSchema>;
+  private dialect: MySqlDialect;
+  private session: MySqlSession<any, any, any, any>;
+  schema: RelationalSchemaConfig<TSchema> | undefined;
 
-  constructor(client: MySql2Client, config?: MySql2DrizzleConfig<TSchema>) {
-    this.db = drizzle(client, config);
-    this.select = this.db.select;
-    this.query = this.callQuery();
+  constructor(client: MySql2Database<TSchema>) {
+    Object.assign(this, client);
+    this.client = client;
+    // @ts-ignore
+    this.dialect = client.dialect;
+    // @ts-ignore
+    this.session = client.session;
   }
 
-  beforeUpdate(e: MySqlTable) {
-    console.log(e);
-  }
-
-  callQuery() {
-    console.log('query');
-    return this.db.query;
-  }
-
-  update(e: MySqlTable) {
-    this.beforeUpdate(e);
-    const res = update(this.db.update(e), e);
-    console.log('update fin');
+  update<TTable extends MySqlTable>(e: TTable) {
+    const res = update(e, this.session, this.dialect);
+    console.log('drizzle', 'update');
     return res;
-  }
-
-  select() {
-    console.log('select');
-    return this.db.select();
   }
 }
 
 export function wrapper<
   TSchema extends Record<string, unknown> = Record<string, never>,
->(client: MySql2Client, config?: MySql2DrizzleConfig<TSchema>) {
-  return new Wrapper(client, config) as unknown as MySql2Database<TSchema>;
+>(client: MySql2Database<TSchema>, config?: MySql2DrizzleConfig<TSchema>) {
+  // console.log(client._.schema);
+  // const dialect = new MySqlDialect();
+
+  console.log(client._.schema);
+  return new Wrapper(client) as unknown as MySql2Database<TSchema>;
 }
 //

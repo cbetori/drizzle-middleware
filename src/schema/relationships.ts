@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import * as schema from './schema.ts';
+import * as schema from './schema.js';
 export const userRelations = relations(schema.user, ({ one, many }) => ({
   createdByuser: one(schema.user, {
     fields: [schema.user.createdBy],

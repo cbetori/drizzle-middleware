@@ -1,0 +1,15 @@
+{
+  "ts-node": {
+    "swc": true
+  },
+  "compilerOptions": {
+    "outDir": "./out",
+    "rootDir": "./src",
+    "sourceMap": true,
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "target": "ES2017"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
