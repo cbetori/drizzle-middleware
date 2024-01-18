@@ -1,0 +1,16 @@
+{
+	"type": "module",
+	"name": "drizzle-middleware",
+	"scripts": {
+		"start": "drizzle-kit start",
+		"intro": "drizzle-kit introspect:mysql",
+		"build": "drizzle-kit build",
+		"test": "drizzle-kit test",
+		"eject": "drizzle-kit eject"
+	},
+	"dependencies": {
+		"drizzle-kit": "^0.20.13",
+		"drizzle-orm": "^0.29.3",
+		"mysql2": "^3.7.0"
+	}
+}
