@@ -19,14 +19,30 @@ const d = drizzle(connection, {
 });
 
 const db = wrapper(d);
+db.addHook('beforeUpdate', (values) => {
+  values.updatedDate = new Date();
+  return values;
+});
+
+const update = await db
+  .update(schema.user)
+  .set({ updatedDate: '2024-01-29' })
+  .where(eq(schema.user.id, 1));
+
+console.log('update', update);
 
 const user = await db.query.user.findFirst();
 
 console.log('user', user);
 
-const update = await db
-  .update(schema.user)
-  .set({ updatedDate: '2024-01-18' })
-  .where(eq(schema.user.id, 1));
+const del = await db.delete(schema.user).where(eq(schema.user.id, 0));
+console.log('del', del);
 
-console.log('update', update);
+const { id, email, ...newUser } = user;
+
+const insert = await db.insert(schema.user).values({
+  ...newUser,
+  email: (Math.random() + 1).toString(36).substring(7),
+} as any);
+
+console.log('insert', insert);
